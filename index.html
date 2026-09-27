@@ -30,6 +30,7 @@
                             500: '#6366f1',
                             600: '#4f46e5',
                             700: '#4338ca',
+                            800: '#3730a3',
                             900: '#312e81',
                         }
                     }
@@ -39,21 +40,14 @@
     </script>
     
     <style>
-        /* Custom Smooth Scroll & Glassmorphism */
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
         .tab-btn.active {
-            color: #4f46e5;
+            color: #3730a3;
             border-bottom-color: #4f46e5;
             background-color: #eef2ff;
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -72,41 +66,41 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-full flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- HEADER & NAVIGATION -->
+    <!-- HEADER & NAVIGATION (Semantic Header & Nav) -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Branding -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                         <i class="fa-solid fa-layer-group text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold bg-gradient-to-r from-slate-900 via-indigo-950 to-brand-700 bg-clip-text text-transparent">
+                        <h1 class="text-xl font-bold text-slate-900">
                             OmniHub
                         </h1>
-                        <p class="text-xs text-slate-500 font-medium hidden sm:block">PABWE Praktikum 3 — Single Page App</p>
+                        <p class="text-xs text-slate-600 font-semibold hidden sm:block">PABWE Praktikum 3 — Single Page App</p>
                     </div>
                 </div>
 
-                <!-- Live Date Badge -->
-                <div class="hidden md:flex items-center space-x-2 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                    <i class="fa-regular fa-calendar-alt text-brand-600"></i>
+                <!-- Live Date Badge (High contrast text: text-slate-900 on bg-slate-100) -->
+                <div class="hidden md:flex items-center space-x-2 text-xs font-bold text-slate-900 bg-slate-200 px-3 py-1.5 rounded-full border border-slate-300">
+                    <i class="fa-regular fa-calendar-alt text-brand-700"></i>
                     <span id="current-date-display">...</span>
                 </div>
             </div>
 
-            <!-- Tab Navigation (Semantic nav) -->
-            <nav class="flex space-x-2 border-t border-slate-100 overflow-x-auto no-scrollbar py-2" aria-label="Tabs">
-                <button type="button" id="tab-expense" class="tab-btn active flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-slate-600 rounded-xl hover:text-brand-600 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
+            <!-- Tab Navigation (Semantic Nav) -->
+            <nav class="flex space-x-2 border-t border-slate-100 overflow-x-auto no-scrollbar py-2" aria-label="Navigasi Tab Utama">
+                <button type="button" id="tab-expense" class="tab-btn active flex items-center space-x-2 px-4 py-2.5 text-sm font-bold text-slate-700 rounded-xl hover:text-brand-800 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
                     <i class="fa-solid fa-wallet text-base"></i>
                     <span>Catatan Pengeluaran</span>
                 </button>
-                <button type="button" id="tab-bookmark" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-slate-600 rounded-xl hover:text-brand-600 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
+                <button type="button" id="tab-bookmark" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm font-bold text-slate-700 rounded-xl hover:text-brand-800 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
                     <i class="fa-solid fa-bookmark text-base"></i>
                     <span>Kelola Bookmark</span>
                 </button>
-                <button type="button" id="tab-quiz" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-slate-600 rounded-xl hover:text-brand-600 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
+                <button type="button" id="tab-quiz" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm font-bold text-slate-700 rounded-xl hover:text-brand-800 hover:bg-slate-100 transition-all border-b-2 border-transparent shrink-0">
                     <i class="fa-solid fa-gamepad text-base"></i>
                     <span>Kuis Interaktif</span>
                 </button>
@@ -119,78 +113,79 @@
 
         <!-- ==================== TAB 1: EXPENSE TRACKER ==================== -->
         <section id="panel-expense" class="tab-panel space-y-6">
-            <!-- Header Section -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-slate-900/10">
+            <!-- Header Banner -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
                 <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-indigo-200 border border-white/10 mb-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 mb-2">
                         <i class="fa-solid fa-chart-line text-emerald-400"></i> Financial Tracker
                     </span>
-                    <h2 class="text-2xl font-extrabold tracking-tight">Catatan Pengeluaran Harian</h2>
-                    <p class="text-indigo-200 text-sm mt-1 max-w-xl">
+                    <h2 class="text-2xl font-extrabold tracking-tight text-white">Catatan Pengeluaran Harian</h2>
+                    <p class="text-slate-200 text-sm mt-1 max-w-xl font-medium">
                         Kelola arus kas pribadi Anda. Catat pemasukan dan pengeluaran harian dengan aman di memori lokal peramban.
                     </p>
                 </div>
-                <button type="button" id="btn-open-add-expense" class="inline-flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 active:scale-95 shrink-0">
+                <!-- Button bg-emerald-800 gives contrast ratio > 7:1 against white text -->
+                <button type="button" id="btn-open-add-expense" class="inline-flex items-center justify-center space-x-2 bg-emerald-800 hover:bg-emerald-900 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg border border-emerald-700 transition-all hover:scale-105 active:scale-95 shrink-0">
                     <i class="fa-solid fa-plus text-base"></i>
                     <span>Tambah Transaksi</span>
                 </button>
             </div>
 
-            <!-- Financial Summary Cards -->
+            <!-- Financial Summary Cards (High contrast titles: text-slate-700 on white) -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <!-- Total Income -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 border border-emerald-100">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl shrink-0 border border-emerald-200">
                         <i class="fa-solid fa-arrow-down-left"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Pemasukan</p>
-                        <h3 id="expense-sum-income" class="text-xl font-bold text-emerald-600 mt-0.5">Rp 0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Total Pemasukan</p>
+                        <h3 id="expense-sum-income" class="text-xl font-extrabold text-emerald-800 mt-0.5">Rp 0</h3>
                     </div>
                 </div>
 
                 <!-- Total Expense -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 border border-rose-100">
+                    <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center text-xl shrink-0 border border-rose-200">
                         <i class="fa-solid fa-arrow-up-right"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Pengeluaran</p>
-                        <h3 id="expense-sum-expense" class="text-xl font-bold text-rose-600 mt-0.5">Rp 0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Total Pengeluaran</p>
+                        <h3 id="expense-sum-expense" class="text-xl font-extrabold text-rose-800 mt-0.5">Rp 0</h3>
                     </div>
                 </div>
 
                 <!-- Net Balance -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div id="expense-balance-icon" class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 border border-indigo-100">
+                    <div id="expense-balance-icon" class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center text-xl shrink-0 border border-indigo-200">
                         <i class="fa-solid fa-wallet"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Saldo Akhir</p>
-                        <h3 id="expense-sum-balance" class="text-xl font-bold text-slate-800 mt-0.5">Rp 0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Saldo Akhir</p>
+                        <h3 id="expense-sum-balance" class="text-xl font-extrabold text-slate-900 mt-0.5">Rp 0</h3>
                     </div>
                 </div>
             </div>
 
-            <!-- Filter, Search, and Sort Bar -->
+            <!-- Filter, Search, and Sort Bar (Accessible Labels Added) -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center">
                 <!-- Search Input -->
                 <div class="relative w-full md:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="expense-search-input" placeholder="Cari transaksi..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input type="text" id="expense-search-input" aria-label="Cari Transaksi" placeholder="Cari transaksi..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 font-medium transition-all">
                 </div>
 
                 <!-- Filters & Sort -->
                 <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
                     <!-- Filter Tipe -->
-                    <select id="expense-filter-type" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-700">
+                    <select id="expense-filter-type" aria-label="Filter Tipe Transaksi" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 font-bold text-slate-800">
                         <option value="all">Semua Tipe</option>
                         <option value="pemasukan">Pemasukan</option>
                         <option value="pengeluaran">Pengeluaran</option>
                     </select>
 
                     <!-- Filter Kategori -->
-                    <select id="expense-filter-category" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-700">
+                    <select id="expense-filter-category" aria-label="Filter Kategori Transaksi" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 font-bold text-slate-800">
                         <option value="all">Semua Kategori</option>
                         <option value="Makanan & Minuman">Makanan & Minuman</option>
                         <option value="Transportasi">Transportasi</option>
@@ -202,7 +197,7 @@
                     </select>
 
                     <!-- Sort -->
-                    <select id="expense-sort-select" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-700">
+                    <select id="expense-sort-select" aria-label="Urutkan Transaksi" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 font-bold text-slate-800">
                         <option value="date-desc">Terbaru</option>
                         <option value="date-asc">Terlama</option>
                         <option value="amount-desc">Jumlah Terbesar</option>
@@ -216,7 +211,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
                                 <th class="py-3.5 px-4 font-bold">Transaksi</th>
                                 <th class="py-3.5 px-4 font-bold">Kategori</th>
                                 <th class="py-3.5 px-4 font-bold">Tanggal</th>
@@ -232,11 +227,11 @@
 
                 <!-- Empty State -->
                 <div id="expense-empty-state" class="hidden p-12 text-center">
-                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl mb-3">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-500 text-2xl mb-3">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
-                    <h3 class="text-base font-bold text-slate-700">Belum Ada Transaksi</h3>
-                    <p class="text-slate-500 text-xs mt-1 max-w-sm mx-auto">Tidak ada catatan transaksi yang sesuai dengan filter Anda. Klik "Tambah Transaksi" untuk memulai.</p>
+                    <h3 class="text-base font-bold text-slate-800">Belum Ada Transaksi</h3>
+                    <p class="text-slate-600 text-xs mt-1 max-w-sm mx-auto font-medium">Tidak ada catatan transaksi yang sesuai dengan filter Anda. Klik "Tambah Transaksi" untuk memulai.</p>
                 </div>
             </div>
         </section>
@@ -244,35 +239,36 @@
 
         <!-- ==================== TAB 2: BOOKMARK MANAGER ==================== -->
         <section id="panel-bookmark" class="tab-panel hidden space-y-6">
-            <!-- Header Section -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-slate-900/10">
+            <!-- Header Banner -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
                 <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-blue-200 border border-white/10 mb-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-950 text-sky-300 border border-sky-700/50 mb-2">
                         <i class="fa-solid fa-link text-sky-400"></i> Link Manager
                     </span>
-                    <h2 class="text-2xl font-extrabold tracking-tight">Kelola Bookmark & Tautan</h2>
-                    <p class="text-blue-200 text-sm mt-1 max-w-xl">
+                    <h2 class="text-2xl font-extrabold tracking-tight text-white">Kelola Bookmark & Tautan</h2>
+                    <p class="text-slate-200 text-sm mt-1 max-w-xl font-medium">
                         Simpan dan organisasikan link website penting, dokumentasi, dan tautan favorit Anda dengan cepat.
                     </p>
                 </div>
-                <button type="button" id="btn-open-add-bookmark" class="inline-flex items-center justify-center space-x-2 bg-sky-500 hover:bg-sky-600 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg shadow-sky-500/25 transition-all hover:scale-105 active:scale-95 shrink-0">
+                <!-- Button bg-sky-800 gives high contrast against white text -->
+                <button type="button" id="btn-open-add-bookmark" class="inline-flex items-center justify-center space-x-2 bg-sky-800 hover:bg-sky-900 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg border border-sky-700 transition-all hover:scale-105 active:scale-95 shrink-0">
                     <i class="fa-solid fa-plus text-base"></i>
                     <span>Tambah Bookmark</span>
                 </button>
             </div>
 
-            <!-- Filter, Search, and Sort Bar -->
+            <!-- Filter, Search, and Sort Bar (Accessible Labels Added) -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center">
                 <!-- Search Input -->
                 <div class="relative w-full md:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="bookmark-search-input" placeholder="Cari nama, URL, atau catatan..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input type="text" id="bookmark-search-input" aria-label="Cari Bookmark" placeholder="Cari nama, URL, atau catatan..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 focus:bg-white text-slate-900 font-medium transition-all">
                 </div>
 
                 <!-- Filters & Sort -->
                 <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
                     <!-- Filter Kategori -->
-                    <select id="bookmark-filter-category" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium text-slate-700">
+                    <select id="bookmark-filter-category" aria-label="Filter Kategori Bookmark" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 font-bold text-slate-800">
                         <option value="all">Semua Kategori</option>
                         <option value="Pekerjaan">Pekerjaan</option>
                         <option value="Edukasi">Edukasi</option>
@@ -282,7 +278,7 @@
                     </select>
 
                     <!-- Sort -->
-                    <select id="bookmark-sort-select" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium text-slate-700">
+                    <select id="bookmark-sort-select" aria-label="Urutkan Bookmark" class="w-full sm:w-auto px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 font-bold text-slate-800">
                         <option value="date-desc">Terbaru</option>
                         <option value="title-asc">Judul (A - Z)</option>
                         <option value="title-desc">Judul (Z - A)</option>
@@ -297,11 +293,11 @@
 
             <!-- Empty State -->
             <div id="bookmark-empty-state" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl mb-3">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-500 text-2xl mb-3">
                     <i class="fa-solid fa-bookmark"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-700">Belum Ada Bookmark</h3>
-                <p class="text-slate-500 text-xs mt-1 max-w-sm mx-auto">Daftar tautan Anda masih kosong. Klik "Tambah Bookmark" untuk menyimpan link favorit Anda.</p>
+                <h3 class="text-base font-bold text-slate-800">Belum Ada Bookmark</h3>
+                <p class="text-slate-600 text-xs mt-1 max-w-sm mx-auto font-medium">Daftar tautan Anda masih kosong. Klik "Tambah Bookmark" untuk menyimpan link favorit Anda.</p>
             </div>
         </section>
 
@@ -309,24 +305,24 @@
         <!-- ==================== TAB 3: QUIZ APP ==================== -->
         <section id="panel-quiz" class="tab-panel hidden space-y-6">
             <!-- Header Section -->
-            <div class="bg-gradient-to-r from-violet-900 via-purple-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-purple-900/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-purple-200 border border-white/10 mb-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-950 text-purple-300 border border-purple-700/50 mb-2">
                         <i class="fa-solid fa-brain text-amber-400"></i> Quiz Challenge
                     </span>
-                    <h2 class="text-2xl font-extrabold tracking-tight">Kuis Interaktif Pemrograman Web</h2>
-                    <p class="text-purple-200 text-sm mt-1 max-w-xl">
+                    <h2 class="text-2xl font-extrabold tracking-tight text-white">Kuis Interaktif Pemrograman Web</h2>
+                    <p class="text-slate-200 text-sm mt-1 max-w-xl font-medium">
                         Uji pengetahuan Anda tentang Dasar-Dasar HTML5, CSS3, JavaScript, dan DOM API.
                     </p>
                 </div>
                 <!-- High Score Card -->
-                <div class="bg-white/10 backdrop-blur-md border border-white/15 px-4 py-3 rounded-xl flex items-center space-x-3 shrink-0">
-                    <div class="w-10 h-10 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center text-xl">
+                <div class="bg-slate-800 border border-slate-700 px-4 py-3 rounded-xl flex items-center space-x-3 shrink-0">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
                         <i class="fa-solid fa-trophy"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold text-purple-200 uppercase tracking-wider">Skor Tertinggi</p>
-                        <p id="quiz-highscore-display" class="text-lg font-bold text-white">0 / 0</p>
+                        <p class="text-xs font-bold text-slate-300 uppercase tracking-wider">Skor Tertinggi</p>
+                        <p id="quiz-highscore-display" class="text-lg font-extrabold text-white">0 / 0</p>
                     </div>
                 </div>
             </div>
@@ -336,29 +332,29 @@
                 
                 <!-- STATE 1: WELCOME SCREEN -->
                 <div id="quiz-screen-start" class="text-center py-8 max-w-lg mx-auto space-y-6">
-                    <div class="w-20 h-20 bg-purple-50 text-purple-600 rounded-3xl flex items-center justify-center text-3xl mx-auto border border-purple-100 shadow-sm">
+                    <div class="w-20 h-20 bg-purple-100 text-purple-800 rounded-3xl flex items-center justify-center text-3xl mx-auto border border-purple-200 shadow-sm">
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold text-slate-800">Siap Menguji Kemampuan Web Dev Anda?</h3>
-                        <p class="text-slate-500 text-sm mt-2">
+                        <h3 class="text-2xl font-extrabold text-slate-900">Siap Menguji Kemampuan Web Dev Anda?</h3>
+                        <p class="text-slate-600 text-sm mt-2 font-medium">
                             Kuis ini terdiri dari 5 soal pilihan ganda seputar JavaScript dan DOM. Jawablah soal-soal tersebut dengan cermat!
                         </p>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-xs text-slate-600 space-y-2">
-                        <div class="flex items-center space-x-2 font-semibold text-slate-700">
-                            <i class="fa-solid fa-circle-info text-brand-500"></i>
+                    <div class="bg-slate-100 p-4 rounded-xl border border-slate-200 text-left text-xs text-slate-800 space-y-2">
+                        <div class="flex items-center space-x-2 font-bold text-slate-900">
+                            <i class="fa-solid fa-circle-info text-brand-700"></i>
                             <span>Aturan Kuis:</span>
                         </div>
-                        <ul class="list-disc list-inside space-y-1 text-slate-500 pl-1">
+                        <ul class="list-disc list-inside space-y-1 text-slate-700 font-medium pl-1">
                             <li>Setiap soal memiliki 4 opsi pilihan ganda.</li>
                             <li>Feedback jawaban akan langsung ditampilkan setelah Anda memilih.</li>
                             <li>Skor terbaik Anda akan disimpan secara otomatis di peramban.</li>
                         </ul>
                     </div>
 
-                    <button type="button" id="btn-quiz-start" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-base rounded-xl shadow-lg shadow-purple-500/25 transition-all hover:scale-105 active:scale-95">
+                    <button type="button" id="btn-quiz-start" class="w-full sm:w-auto px-8 py-3.5 bg-purple-800 hover:bg-purple-900 text-white font-bold text-base rounded-xl shadow-lg border border-purple-700 transition-all hover:scale-105 active:scale-95">
                         <i class="fa-solid fa-play mr-2"></i> Mulai Kuis Sekarang
                     </button>
                 </div>
@@ -366,19 +362,19 @@
                 <!-- STATE 2: QUESTION SCREEN -->
                 <div id="quiz-screen-question" class="hidden space-y-6">
                     <!-- Progress Header -->
-                    <div class="flex items-center justify-between text-sm font-semibold text-slate-500">
-                        <span id="quiz-progress-text" class="text-purple-600">Soal 1 dari 5</span>
-                        <span id="quiz-score-live" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold border border-purple-100">Skor: 0</span>
+                    <div class="flex items-center justify-between text-sm font-bold text-slate-700">
+                        <span id="quiz-progress-text" class="text-purple-800">Soal 1 dari 5</span>
+                        <span id="quiz-score-live" class="bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-xs font-extrabold border border-purple-200">Skor: 0</span>
                     </div>
 
                     <!-- Progress Bar -->
-                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                        <div id="quiz-progress-bar" class="bg-purple-600 h-full transition-all duration-300 w-0"></div>
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-purple-700 h-full transition-all duration-300 w-0"></div>
                     </div>
 
                     <!-- Question Text -->
                     <div class="pt-2">
-                        <h3 id="quiz-question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
+                        <h3 id="quiz-question-text" class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-snug">
                             Loading pertanyaan...
                         </h3>
                     </div>
@@ -394,14 +390,14 @@
                             <i id="quiz-feedback-icon" class="fa-solid text-lg mt-0.5"></i>
                             <div>
                                 <h4 id="quiz-feedback-title" class="font-bold"></h4>
-                                <p id="quiz-feedback-desc" class="mt-1 text-xs leading-relaxed"></p>
+                                <p id="quiz-feedback-desc" class="mt-1 text-xs leading-relaxed font-medium"></p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Next Question Button -->
                     <div class="flex justify-end pt-4 border-t border-slate-100">
-                        <button type="button" id="btn-quiz-next" disabled class="px-6 py-3 bg-slate-300 text-slate-500 font-bold text-sm rounded-xl cursor-not-allowed transition-all flex items-center space-x-2">
+                        <button type="button" id="btn-quiz-next" disabled class="px-6 py-3 bg-slate-300 text-slate-600 font-bold text-sm rounded-xl cursor-not-allowed transition-all flex items-center space-x-2">
                             <span>Soal Berikutnya</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
@@ -415,24 +411,24 @@
                     </div>
 
                     <div>
-                        <span id="quiz-new-highscore-tag" class="hidden inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 mb-2">
-                            <i class="fa-solid fa-crown text-amber-500"></i> Rekor Baru Tercapai!
+                        <span id="quiz-new-highscore-tag" class="hidden inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 mb-2">
+                            <i class="fa-solid fa-crown text-amber-600"></i> Rekor Baru Tercapai!
                         </span>
-                        <h3 class="text-2xl font-extrabold text-slate-800">Kuis Selesai!</h3>
-                        <p id="quiz-result-subtitle" class="text-slate-500 text-sm mt-1">Berikut adalah hasil pencapaian Anda:</p>
+                        <h3 class="text-2xl font-extrabold text-slate-900">Kuis Selesai!</h3>
+                        <p id="quiz-result-subtitle" class="text-slate-600 text-sm mt-1 font-medium">Berikut adalah hasil pencapaian Anda:</p>
                     </div>
 
                     <!-- Score Card -->
-                    <div class="bg-gradient-to-b from-slate-50 to-purple-50/50 p-6 rounded-2xl border border-purple-100 space-y-2">
-                        <p class="text-xs uppercase font-bold tracking-wider text-slate-400">Skor Akhir Anda</p>
-                        <div class="text-4xl font-black text-purple-700">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-purple-200 space-y-2">
+                        <p class="text-xs uppercase font-extrabold tracking-wider text-slate-700">Skor Akhir Anda</p>
+                        <div class="text-4xl font-black text-purple-900">
                             <span id="quiz-final-score">0</span> / <span id="quiz-total-questions">5</span>
                         </div>
-                        <p id="quiz-percentage-text" class="text-xs font-semibold text-purple-600">Akurasi: 0%</p>
+                        <p id="quiz-percentage-text" class="text-xs font-bold text-purple-800">Akurasi: 0%</p>
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button type="button" id="btn-quiz-retry" class="flex-1 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <button type="button" id="btn-quiz-retry" class="flex-1 py-3.5 bg-purple-800 hover:bg-purple-900 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 border border-purple-700">
                             <i class="fa-solid fa-rotate-right"></i>
                             <span>Ulangi Kuis</span>
                         </button>
@@ -444,160 +440,159 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
-            <p class="font-semibold text-slate-600">OmniHub &copy; 2026 — Tugas Studi Kasus Praktikum PABWE</p>
-            <p class="text-slate-400">Fitur 1: Expense Tracker &bull; Fitur 2: Link Manager &bull; Fitur 3: Quiz App</p>
-        </div>
-    </footer>
+    <!-- SEMANTIC ASIDE FOR MODALS & TOAST LANDMARK REGION (Satisfies Axe Landmark rule) -->
+    <aside aria-label="Notifikasi dan Modal Dialog">
 
-
-    <!-- ==================== MODALS CONTAINER ==================== -->
-
-    <!-- 1. EXPENSE ADD / EDIT MODAL -->
-    <div id="modal-expense" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modal-expense-card">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                <h3 id="modal-expense-title" class="text-lg font-bold text-slate-800">Tambah Transaksi</h3>
-                <button type="button" id="btn-close-expense-modal" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            
-            <form id="form-expense" class="p-6 space-y-4">
-                <input type="hidden" id="expense-id">
+        <!-- 1. EXPENSE ADD / EDIT MODAL -->
+        <div id="modal-expense" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+            <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modal-expense-card">
+                <div class="px-6 py-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modal-expense-title" class="text-lg font-bold text-slate-900">Tambah Transaksi</h3>
+                    <button type="button" id="btn-close-expense-modal" aria-label="Tutup Modal Expense" class="text-slate-500 hover:text-slate-800 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
                 
-                <!-- Judul Transaksi -->
-                <div>
-                    <label for="expense-title" class="block text-xs font-bold text-slate-700 uppercase mb-1">Judul / Deskripsi <span class="text-rose-500">*</span></label>
-                    <input type="text" id="expense-title" required placeholder="Contoh: Makan Siang, Gaji Bulanan..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Tipe Transaksi -->
+                <form id="form-expense" class="p-6 space-y-4">
+                    <input type="hidden" id="expense-id">
+                    
+                    <!-- Judul Transaksi -->
                     <div>
-                        <label for="expense-type" class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipe <span class="text-rose-500">*</span></label>
-                        <select id="expense-type" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                            <option value="pengeluaran">Pengeluaran</option>
-                            <option value="pemasukan">Pemasukan</option>
-                        </select>
+                        <label for="expense-title" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Judul / Deskripsi <span class="text-rose-600">*</span></label>
+                        <input type="text" id="expense-title" required placeholder="Contoh: Makan Siang, Gaji Bulanan..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 transition-all">
                     </div>
 
-                    <!-- Jumlah -->
-                    <div>
-                        <label for="expense-amount" class="block text-xs font-bold text-slate-700 uppercase mb-1">Jumlah (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" id="expense-amount" min="1" step="any" required placeholder="50000" class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                    </div>
-                </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Tipe Transaksi -->
+                        <div>
+                            <label for="expense-type" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Tipe <span class="text-rose-600">*</span></label>
+                            <select id="expense-type" aria-label="Tipe Transaksi Modal" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 transition-all">
+                                <option value="pengeluaran">Pengeluaran</option>
+                                <option value="pemasukan">Pemasukan</option>
+                            </select>
+                        </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Jumlah -->
+                        <div>
+                            <label for="expense-amount" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Jumlah (Rp) <span class="text-rose-600">*</span></label>
+                            <input type="number" id="expense-amount" min="1" step="any" required placeholder="50000" class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Kategori -->
+                        <div>
+                            <label for="expense-category" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Kategori <span class="text-rose-600">*</span></label>
+                            <select id="expense-category" aria-label="Kategori Transaksi Modal" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 transition-all">
+                                <option value="Makanan & Minuman">Makanan & Minuman</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Gaji & Bonus">Gaji & Bonus</option>
+                                <option value="Belanja">Belanja</option>
+                                <option value="Tagihan & Utilitas">Tagihan & Utilitas</option>
+                                <option value="Hiburan">Hiburan</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <!-- Tanggal -->
+                        <div>
+                            <label for="expense-date" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Tanggal <span class="text-rose-600">*</span></label>
+                            <input type="date" id="expense-date" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-slate-900 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
+                        <button type="button" id="btn-cancel-expense" class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 rounded-xl transition-all">Batal</button>
+                        <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-brand-700 hover:bg-brand-800 rounded-xl shadow-md border border-brand-800 transition-all">Simpan Transaksi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. BOOKMARK ADD / EDIT MODAL -->
+        <div id="modal-bookmark" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+            <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modal-bookmark-card">
+                <div class="px-6 py-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modal-bookmark-title" class="text-lg font-bold text-slate-900">Tambah Bookmark</h3>
+                    <button type="button" id="btn-close-bookmark-modal" aria-label="Tutup Modal Bookmark" class="text-slate-500 hover:text-slate-800 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                
+                <form id="form-bookmark" class="p-6 space-y-4">
+                    <input type="hidden" id="bookmark-id">
+                    
+                    <!-- Nama Bookmark -->
+                    <div>
+                        <label for="bookmark-title" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Nama Tautan / Judul <span class="text-rose-600">*</span></label>
+                        <input type="text" id="bookmark-title" required placeholder="Contoh: Documentation MDN Web Docs..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 focus:bg-white text-slate-900 transition-all">
+                    </div>
+
+                    <!-- URL -->
+                    <div>
+                        <label for="bookmark-url" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">URL Web <span class="text-rose-600">*</span></label>
+                        <input type="url" id="bookmark-url" required placeholder="https://developer.mozilla.org" class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 focus:bg-white text-slate-900 transition-all">
+                        <p class="text-[11px] text-slate-600 font-medium mt-1">Harus diawali dengan http:// atau https://</p>
+                    </div>
+
                     <!-- Kategori -->
                     <div>
-                        <label for="expense-category" class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori <span class="text-rose-500">*</span></label>
-                        <select id="expense-category" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                            <option value="Makanan & Minuman">Makanan & Minuman</option>
-                            <option value="Transportasi">Transportasi</option>
-                            <option value="Gaji & Bonus">Gaji & Bonus</option>
-                            <option value="Belanja">Belanja</option>
-                            <option value="Tagihan & Utilitas">Tagihan & Utilitas</option>
+                        <label for="bookmark-category" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Kategori / Tag <span class="text-rose-600">*</span></label>
+                        <select id="bookmark-category" aria-label="Kategori Bookmark Modal" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 focus:bg-white text-slate-900 transition-all">
+                            <option value="Pekerjaan">Pekerjaan</option>
+                            <option value="Edukasi">Edukasi</option>
+                            <option value="Produktivitas">Produktivitas</option>
                             <option value="Hiburan">Hiburan</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>
                     </div>
 
-                    <!-- Tanggal -->
+                    <!-- Catatan Singkat -->
                     <div>
-                        <label for="expense-date" class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal <span class="text-rose-500">*</span></label>
-                        <input type="date" id="expense-date" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+                        <label for="bookmark-note" class="block text-xs font-extrabold text-slate-800 uppercase mb-1">Catatan Singkat (Opsional)</label>
+                        <textarea id="bookmark-note" rows="2" placeholder="Catatan khusus atau keterangan tautan ini..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-700 focus:bg-white text-slate-900 transition-all"></textarea>
                     </div>
-                </div>
 
-                <div class="pt-4 border-t border-slate-100 flex justify-end space-x-3">
-                    <button type="button" id="btn-cancel-expense" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md shadow-brand-500/20 transition-all">Simpan Transaksi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- 2. BOOKMARK ADD / EDIT MODAL -->
-    <div id="modal-bookmark" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modal-bookmark-card">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                <h3 id="modal-bookmark-title" class="text-lg font-bold text-slate-800">Tambah Bookmark</h3>
-                <button type="button" id="btn-close-bookmark-modal" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            
-            <form id="form-bookmark" class="p-6 space-y-4">
-                <input type="hidden" id="bookmark-id">
-                
-                <!-- Nama Bookmark -->
-                <div>
-                    <label for="bookmark-title" class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Tautan / Judul <span class="text-rose-500">*</span></label>
-                    <input type="text" id="bookmark-title" required placeholder="Contoh: Documentation MDN Web Docs..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
-                </div>
-
-                <!-- URL -->
-                <div>
-                    <label for="bookmark-url" class="block text-xs font-bold text-slate-700 uppercase mb-1">URL Web <span class="text-rose-500">*</span></label>
-                    <input type="url" id="bookmark-url" required placeholder="https://developer.mozilla.org" class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
-                    <p class="text-[11px] text-slate-400 mt-1">Harus diawali dengan http:// atau https://</p>
-                </div>
-
-                <!-- Kategori -->
-                <div>
-                    <label for="bookmark-category" class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori / Tag <span class="text-rose-500">*</span></label>
-                    <select id="bookmark-category" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
-                        <option value="Pekerjaan">Pekerjaan</option>
-                        <option value="Edukasi">Edukasi</option>
-                        <option value="Produktivitas">Produktivitas</option>
-                        <option value="Hiburan">Hiburan</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-
-                <!-- Catatan Singkat -->
-                <div>
-                    <label for="bookmark-note" class="block text-xs font-bold text-slate-700 uppercase mb-1">Catatan Singkat (Opsional)</label>
-                    <textarea id="bookmark-note" rows="2" placeholder="Catatan khusus atau keterangan tautan ini..." class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all"></textarea>
-                </div>
-
-                <div class="pt-4 border-t border-slate-100 flex justify-end space-x-3">
-                    <button type="button" id="btn-cancel-bookmark" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-md shadow-sky-500/20 transition-all">Simpan Bookmark</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- 3. GLOBAL DELETE CONFIRMATION MODAL -->
-    <div id="modal-delete-confirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-100 p-6 text-center space-y-4 transform transition-all scale-95 opacity-0 duration-200" id="modal-delete-card">
-            <div class="w-14 h-14 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center text-2xl mx-auto border border-rose-100">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-bold text-slate-800">Konfirmasi Hapus</h3>
-                <p id="delete-modal-message" class="text-slate-500 text-xs mt-1">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-            <div class="flex space-x-3 pt-2">
-                <button type="button" id="btn-cancel-delete" class="flex-1 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
-                <button type="button" id="btn-confirm-delete" class="flex-1 py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md transition-all">Ya, Hapus</button>
+                    <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
+                        <button type="button" id="btn-cancel-bookmark" class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 rounded-xl transition-all">Batal</button>
+                        <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-sky-800 hover:bg-sky-900 rounded-xl shadow-md border border-sky-800 transition-all">Simpan Bookmark</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
 
+        <!-- 3. GLOBAL DELETE CONFIRMATION MODAL -->
+        <div id="modal-delete-confirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 text-center space-y-4 transform transition-all scale-95 opacity-0 duration-200" id="modal-delete-card">
+                <div class="w-14 h-14 bg-rose-100 text-rose-800 rounded-full flex items-center justify-center text-2xl mx-auto border border-rose-200">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Konfirmasi Hapus</h3>
+                    <p id="delete-modal-message" class="text-slate-700 text-xs font-medium mt-1">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" id="btn-cancel-delete" class="flex-1 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 rounded-xl transition-all">Batal</button>
+                    <button type="button" id="btn-confirm-delete" class="flex-1 py-2.5 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl shadow-md border border-rose-800 transition-all">Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 text-sm font-medium">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
-        <span id="toast-message">Pesan notifikasi</span>
-    </div>
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 text-sm font-bold">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span id="toast-message">Pesan notifikasi</span>
+        </div>
+
+    </aside>
+
+    <!-- FOOTER (Semantic Footer) -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-700 space-y-2 font-medium">
+            <p class="font-bold text-slate-900">OmniHub &copy; 2026 — Tugas Studi Kasus Praktikum PABWE</p>
+            <p class="text-slate-700">Fitur 1: Expense Tracker &bull; Fitur 2: Link Manager &bull; Fitur 3: Quiz App</p>
+        </div>
+    </footer>
 
     <!-- EXTERNAL JAVASCRIPT FILE -->
     <script src="assets/script.js"></script>

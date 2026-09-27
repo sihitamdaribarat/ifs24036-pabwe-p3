@@ -3,8 +3,8 @@
  * PABWE Praktikum 3
  * 
  * Modul Terdiri Dari:
- * 1. Utilities & LocalStorage Handling
- * 2. Tab Navigation System
+ * 1. Utilities & Toast System
+ * 2. Tab Navigation System (berbasis URL Query Parameter ?tab=...)
  * 3. Expense Tracker Logic (Catatan Pengeluaran)
  * 4. Bookmark Manager Logic (Kelola Link)
  * 5. Interactive Quiz Logic (Kuis Pemrograman Web)
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keys for LocalStorage
     const STORAGE_KEYS = {
-        ACTIVE_TAB: 'omnihub_active_tab',
         EXPENSES: 'omnihub_expenses_data',
         BOOKMARKS: 'omnihub_bookmarks_data',
         QUIZ_HIGHSCORE: 'omnihub_quiz_highscore'
@@ -34,9 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const toastMsg = document.getElementById('toast-message');
         const toastIcon = document.getElementById('toast-icon');
 
+        if (!toast || !toastMsg || !toastIcon) return;
+
         toastMsg.textContent = message;
 
-        // Icon & style mapping
         if (type === 'success') {
             toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
         } else if (type === 'error') {
@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toastIcon.className = 'fa-solid fa-circle-info text-sky-400 text-base';
         }
 
-        // Show toast animation
         toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
         
         setTimeout(() => {
@@ -87,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ==========================================================================
-       2. TAB NAVIGATION SYSTEM
+       2. TAB NAVIGATION SYSTEM (URL Query String ?tab=expense|bookmark|quiz)
        ========================================================================== */
 
     const tabs = {
@@ -97,46 +96,69 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
-     * Switch tab view and remember state in localStorage
-     * @param {'expense'|'bookmark'|'quiz'} targetTab 
+     * Get active tab from URL query string ?tab=...
      */
-    function switchTab(targetTab) {
+    function getActiveTabFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam && ['expense', 'bookmark', 'quiz'].includes(tabParam)) {
+            return tabParam;
+        }
+        return 'expense'; // Default tab
+    }
+
+    /**
+     * Switch tab view and update URL query parameter without full reload
+     * @param {'expense'|'bookmark'|'quiz'} targetTab 
+     * @param {boolean} updateHistory 
+     */
+    function switchTab(targetTab, updateHistory = true) {
         if (!tabs[targetTab]) targetTab = 'expense';
 
-        // Update UI states for all tabs
+        // Update UI states for tabs
         Object.keys(tabs).forEach(key => {
             const isTarget = key === targetTab;
-            tabs[key].btn.classList.toggle('active', isTarget);
-            tabs[key].panel.classList.toggle('hidden', !isTarget);
+            if (tabs[key].btn) tabs[key].btn.classList.toggle('active', isTarget);
+            if (tabs[key].panel) tabs[key].panel.classList.toggle('hidden', !isTarget);
         });
 
-        // Persist active tab in localStorage
-        localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, targetTab);
+        // Update URL search query string ?tab=...
+        if (updateHistory) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', targetTab);
+            window.history.replaceState(null, '', url.toString());
+        }
     }
 
     // Bind click handlers for tab buttons
     Object.keys(tabs).forEach(key => {
-        tabs[key].btn.addEventListener('click', () => switchTab(key));
+        if (tabs[key].btn) {
+            tabs[key].btn.addEventListener('click', () => switchTab(key, true));
+        }
     });
 
-    // Restore active tab on application startup
-    const savedTab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || 'expense';
-    switchTab(savedTab);
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', () => {
+        const currentTab = getActiveTabFromURL();
+        switchTab(currentTab, false);
+    });
+
+    // Initialize active tab from URL query string on startup
+    const initialTab = getActiveTabFromURL();
+    switchTab(initialTab, true);
 
 
     /* ==========================================================================
        3. EXPENSE TRACKER LOGIC (FITUR 1)
        ========================================================================== */
 
-    // Seed Data for Expense Tracker if localStorage is empty
     const initialExpenses = [
         { id: 'exp-1', title: 'Gaji Bulanan & Project Bonus', type: 'pemasukan', category: 'Gaji & Bonus', amount: 6500000, date: '2026-09-01' },
         { id: 'exp-2', title: 'Makan Siang Katering & Kopi', type: 'pengeluaran', category: 'Makanan & Minuman', amount: 65000, date: '2026-09-25' },
-        { id: 'exp-3', title: 'Bensin & Serfis Motor', type: 'pengeluaran', category: 'Transportasi', amount: 150000, date: '2026-09-26' },
+        { id: 'exp-3', title: 'Bensin & Servis Motor', type: 'pengeluaran', category: 'Transportasi', amount: 150000, date: '2026-09-26' },
         { id: 'exp-4', title: 'Langganan Internet & Listrik', type: 'pengeluaran', category: 'Tagihan & Utilitas', amount: 450000, date: '2026-09-27' }
     ];
 
-    // Load initial or stored expense data
     let expenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES));
     if (!expenses || !Array.isArray(expenses)) {
         expenses = initialExpenses;
@@ -159,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const expenseFilterCategory = document.getElementById('expense-filter-category');
     const expenseSortSelect = document.getElementById('expense-sort-select');
 
-    // Modal Elements for Expense
+    // Modal Elements
     const modalExpense = document.getElementById('modal-expense');
     const modalExpenseCard = document.getElementById('modal-expense-card');
     const modalExpenseTitle = document.getElementById('modal-expense-title');
@@ -168,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCloseExpenseModal = document.getElementById('btn-close-expense-modal');
     const btnCancelExpense = document.getElementById('btn-cancel-expense');
 
-    // Inputs inside modal
     const inputExpenseId = document.getElementById('expense-id');
     const inputExpenseTitle = document.getElementById('expense-title');
     const inputExpenseType = document.getElementById('expense-type');
@@ -180,12 +201,14 @@ document.addEventListener('DOMContentLoaded', () => {
      * Render Expense List & Summary Balance
      */
     function renderExpenses() {
-        const query = expenseSearchInput.value.toLowerCase().trim();
-        const typeFilter = expenseFilterType.value;
-        const categoryFilter = expenseFilterCategory.value;
-        const sortBy = expenseSortSelect.value;
+        if (!expenseTableBody) return;
 
-        // 1. Calculate Overall Summary (Unfiltered totals)
+        const query = (expenseSearchInput ? expenseSearchInput.value : '').toLowerCase().trim();
+        const typeFilter = expenseFilterType ? expenseFilterType.value : 'all';
+        const categoryFilter = expenseFilterCategory ? expenseFilterCategory.value : 'all';
+        const sortBy = expenseSortSelect ? expenseSortSelect.value : 'date-desc';
+
+        // 1. Overall Summary
         let totalIncome = 0;
         let totalExpense = 0;
 
@@ -200,18 +223,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const netBalance = totalIncome - totalExpense;
 
-        expenseSumIncome.textContent = formatIDR(totalIncome);
-        expenseSumExpense.textContent = formatIDR(totalExpense);
-        expenseSumBalance.textContent = formatIDR(netBalance);
-
-        // Styling net balance color
-        if (netBalance < 0) {
-            expenseSumBalance.className = 'text-xl font-bold text-rose-600 mt-0.5';
-        } else {
-            expenseSumBalance.className = 'text-xl font-bold text-slate-800 mt-0.5';
+        if (expenseSumIncome) expenseSumIncome.textContent = formatIDR(totalIncome);
+        if (expenseSumExpense) expenseSumExpense.textContent = formatIDR(totalExpense);
+        if (expenseSumBalance) {
+            expenseSumBalance.textContent = formatIDR(netBalance);
+            if (netBalance < 0) {
+                expenseSumBalance.className = 'text-xl font-extrabold text-rose-800 mt-0.5';
+            } else {
+                expenseSumBalance.className = 'text-xl font-extrabold text-slate-900 mt-0.5';
+            }
         }
 
-        // 2. Filter Items
+        // 2. Filter
         let filtered = expenses.filter(item => {
             const matchesSearch = item.title.toLowerCase().includes(query) || item.category.toLowerCase().includes(query);
             const matchesType = (typeFilter === 'all') || (item.type === typeFilter);
@@ -220,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return matchesSearch && matchesType && matchesCategory;
         });
 
-        // 3. Sort Items
+        // 3. Sort
         filtered.sort((a, b) => {
             if (sortBy === 'date-desc') return new Date(b.date) - new Date(a.date);
             if (sortBy === 'date-asc') return new Date(a.date) - new Date(b.date);
@@ -229,51 +252,52 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0;
         });
 
-        // 4. Render Rows into DOM Table
+        // 4. Render Rows in DOM with High Contrast Colors
         expenseTableBody.innerHTML = '';
 
         if (filtered.length === 0) {
-            expenseEmptyState.classList.remove('hidden');
+            if (expenseEmptyState) expenseEmptyState.classList.remove('hidden');
         } else {
-            expenseEmptyState.classList.add('hidden');
+            if (expenseEmptyState) expenseEmptyState.classList.add('hidden');
 
             filtered.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/80 transition-all';
+                tr.className = 'hover:bg-slate-50 transition-all border-b border-slate-100';
 
                 const isIncome = item.type === 'pemasukan';
+                // High contrast badge colors
                 const typeBadgeClass = isIncome 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                    : 'bg-rose-50 text-rose-700 border-rose-200';
+                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300 font-bold' 
+                    : 'bg-rose-100 text-rose-900 border-rose-300 font-bold';
                 const typeIcon = isIncome ? 'fa-arrow-down-left' : 'fa-arrow-up-right';
                 const typeText = isIncome ? 'Pemasukan' : 'Pengeluaran';
                 const amountSign = isIncome ? '+' : '-';
-                const amountClass = isIncome ? 'text-emerald-600 font-bold' : 'text-slate-800 font-bold';
+                const amountClass = isIncome ? 'text-emerald-900 font-extrabold' : 'text-rose-900 font-extrabold';
 
                 tr.innerHTML = `
-                    <td class="py-3.5 px-4 font-semibold text-slate-800">
+                    <td class="py-3.5 px-4 font-bold text-slate-900">
                         <div>${escapeHTML(item.title)}</div>
                         <div class="mt-1 sm:hidden">
-                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${typeBadgeClass}">
+                            <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${typeBadgeClass}">
                                 <i class="fa-solid ${typeIcon}"></i> ${typeText}
                             </span>
                         </div>
                     </td>
                     <td class="py-3.5 px-4">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-800 border border-slate-300">
                             ${escapeHTML(item.category)}
                         </span>
                     </td>
-                    <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">${formatDateID(item.date)}</td>
+                    <td class="py-3.5 px-4 text-slate-700 font-medium whitespace-nowrap">${formatDateID(item.date)}</td>
                     <td class="py-3.5 px-4 text-right ${amountClass} whitespace-nowrap">
                         ${amountSign} ${formatIDR(item.amount)}
                     </td>
                     <td class="py-3.5 px-4 text-center whitespace-nowrap">
                         <div class="flex items-center justify-center space-x-1">
-                            <button type="button" data-action="edit-expense" data-id="${item.id}" class="w-8 h-8 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 flex items-center justify-center transition-all" title="Ubah">
+                            <button type="button" data-action="edit-expense" data-id="${item.id}" aria-label="Ubah Transaksi ${escapeHTML(item.title)}" class="w-8 h-8 rounded-lg text-slate-600 hover:text-brand-800 hover:bg-slate-200 flex items-center justify-center transition-all" title="Ubah">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button type="button" data-action="delete-expense" data-id="${item.id}" class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all" title="Hapus">
+                            <button type="button" data-action="delete-expense" data-id="${item.id}" aria-label="Hapus Transaksi ${escapeHTML(item.title)}" class="w-8 h-8 rounded-lg text-slate-600 hover:text-rose-800 hover:bg-rose-100 flex items-center justify-center transition-all" title="Hapus">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -285,8 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Modal Control Functions for Expense
+    // Modal Controls
     function openExpenseModal(expenseToEdit = null) {
+        if (!modalExpense || !modalExpenseCard) return;
+
         formExpense.reset();
         
         if (expenseToEdit) {
@@ -300,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             modalExpenseTitle.textContent = 'Tambah Transaksi Baru';
             inputExpenseId.value = '';
-            // Default date to today YYYY-MM-DD
             inputExpenseDate.value = new Date().toISOString().split('T')[0];
         }
 
@@ -312,6 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeExpenseModal() {
+        if (!modalExpense || !modalExpenseCard) return;
+
         modalExpenseCard.classList.remove('scale-100', 'opacity-100');
         modalExpenseCard.classList.add('scale-95', 'opacity-0');
         setTimeout(() => {
@@ -319,100 +346,98 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
 
-    // Expense Event Listeners
-    btnOpenAddExpense.addEventListener('click', () => openExpenseModal());
-    btnCloseExpenseModal.addEventListener('click', closeExpenseModal);
-    btnCancelExpense.addEventListener('click', closeExpenseModal);
+    if (btnOpenAddExpense) btnOpenAddExpense.addEventListener('click', () => openExpenseModal());
+    if (btnCloseExpenseModal) btnCloseExpenseModal.addEventListener('click', closeExpenseModal);
+    if (btnCancelExpense) btnCancelExpense.addEventListener('click', closeExpenseModal);
 
-    // Filter & Search Inputs Live Updates
     [expenseSearchInput, expenseFilterType, expenseFilterCategory, expenseSortSelect].forEach(element => {
-        element.addEventListener('input', renderExpenses);
-        element.addEventListener('change', renderExpenses);
+        if (element) {
+            element.addEventListener('input', renderExpenses);
+            element.addEventListener('change', renderExpenses);
+        }
     });
 
-    // Handle Form Submit (Add / Edit)
-    formExpense.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (formExpense) {
+        formExpense.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        const title = inputExpenseTitle.value.trim();
-        const type = inputExpenseType.value;
-        const amount = parseFloat(inputExpenseAmount.value);
-        const category = inputExpenseCategory.value;
-        const date = inputExpenseDate.value;
-        const id = inputExpenseId.value;
+            const title = inputExpenseTitle.value.trim();
+            const type = inputExpenseType.value;
+            const amount = parseFloat(inputExpenseAmount.value);
+            const category = inputExpenseCategory.value;
+            const date = inputExpenseDate.value;
+            const id = inputExpenseId.value;
 
-        // Validation
-        if (!title) {
-            showToast('Judul transaksi tidak boleh kosong!', 'error');
-            return;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-            showToast('Jumlah transaksi harus berupa angka lebih dari 0!', 'error');
-            return;
-        }
-
-        if (!date) {
-            showToast('Tanggal transaksi wajib diisi!', 'error');
-            return;
-        }
-
-        if (id) {
-            // Edit existing item
-            const index = expenses.findIndex(x => x.id === id);
-            if (index !== -1) {
-                expenses[index] = { id, title, type, category, amount, date };
-                showToast('Transaksi berhasil diperbarui!', 'success');
+            if (!title) {
+                showToast('Judul transaksi tidak boleh kosong!', 'error');
+                return;
             }
-        } else {
-            // Add new item
-            const newItem = {
-                id: 'exp-' + Date.now(),
-                title,
-                type,
-                category,
-                amount,
-                date
-            };
-            expenses.unshift(newItem);
-            showToast('Transaksi berhasil ditambahkan!', 'success');
-        }
 
-        saveExpenses();
-        renderExpenses();
-        closeExpenseModal();
-    });
-
-    // Delegate Table Action Buttons (Edit & Delete)
-    expenseTableBody.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action]');
-        if (!btn) return;
-
-        const action = btn.getAttribute('data-action');
-        const id = btn.getAttribute('data-id');
-
-        if (action === 'edit-expense') {
-            const item = expenses.find(x => x.id === id);
-            if (item) openExpenseModal(item);
-        } else if (action === 'delete-expense') {
-            const item = expenses.find(x => x.id === id);
-            if (item) {
-                openDeleteConfirmModal(`Apakah Anda yakin ingin menghapus transaksi "${item.title}"?`, () => {
-                    expenses = expenses.filter(x => x.id !== id);
-                    saveExpenses();
-                    renderExpenses();
-                    showToast('Transaksi telah dihapus.', 'info');
-                });
+            if (isNaN(amount) || amount <= 0) {
+                showToast('Jumlah transaksi harus berupa angka lebih dari 0!', 'error');
+                return;
             }
-        }
-    });
+
+            if (!date) {
+                showToast('Tanggal transaksi wajib diisi!', 'error');
+                return;
+            }
+
+            if (id) {
+                const index = expenses.findIndex(x => x.id === id);
+                if (index !== -1) {
+                    expenses[index] = { id, title, type, category, amount, date };
+                    showToast('Transaksi berhasil diperbarui!', 'success');
+                }
+            } else {
+                const newItem = {
+                    id: 'exp-' + Date.now(),
+                    title,
+                    type,
+                    category,
+                    amount,
+                    date
+                };
+                expenses.unshift(newItem);
+                showToast('Transaksi berhasil ditambahkan!', 'success');
+            }
+
+            saveExpenses();
+            renderExpenses();
+            closeExpenseModal();
+        });
+    }
+
+    if (expenseTableBody) {
+        expenseTableBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const id = btn.getAttribute('data-id');
+
+            if (action === 'edit-expense') {
+                const item = expenses.find(x => x.id === id);
+                if (item) openExpenseModal(item);
+            } else if (action === 'delete-expense') {
+                const item = expenses.find(x => x.id === id);
+                if (item) {
+                    openDeleteConfirmModal(`Apakah Anda yakin ingin menghapus transaksi "${item.title}"?`, () => {
+                        expenses = expenses.filter(x => x.id !== id);
+                        saveExpenses();
+                        renderExpenses();
+                        showToast('Transaksi telah dihapus.', 'info');
+                    });
+                }
+            }
+        });
+    }
 
 
     /* ==========================================================================
        4. BOOKMARK MANAGER LOGIC (FITUR 2)
        ========================================================================== */
 
-    // Initial Seed Bookmarks if empty
     const initialBookmarks = [
         { id: 'bm-1', title: 'MDN Web Docs JavaScript', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript', category: 'Edukasi', note: 'Dokumentasi standar resmi JavaScript dan API DOM peramban.', createdAt: '2026-09-20' },
         { id: 'bm-2', title: 'Tailwind CSS Documentation', url: 'https://tailwindcss.com/docs', category: 'Pekerjaan', note: 'Panduan kelas utilitas Tailwind untuk styling cepat.', createdAt: '2026-09-22' },
@@ -429,14 +454,12 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(bookmarks));
     }
 
-    // DOM Elements for Bookmark Manager
     const bookmarkGrid = document.getElementById('bookmark-grid');
     const bookmarkEmptyState = document.getElementById('bookmark-empty-state');
     const bookmarkSearchInput = document.getElementById('bookmark-search-input');
     const bookmarkFilterCategory = document.getElementById('bookmark-filter-category');
     const bookmarkSortSelect = document.getElementById('bookmark-sort-select');
 
-    // Modal Elements for Bookmark
     const modalBookmark = document.getElementById('modal-bookmark');
     const modalBookmarkCard = document.getElementById('modal-bookmark-card');
     const modalBookmarkTitle = document.getElementById('modal-bookmark-title');
@@ -455,11 +478,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * Render Bookmark Grid List
      */
     function renderBookmarks() {
-        const query = bookmarkSearchInput.value.toLowerCase().trim();
-        const categoryFilter = bookmarkFilterCategory.value;
-        const sortBy = bookmarkSortSelect.value;
+        if (!bookmarkGrid) return;
 
-        // 1. Filter
+        const query = (bookmarkSearchInput ? bookmarkSearchInput.value : '').toLowerCase().trim();
+        const categoryFilter = bookmarkFilterCategory ? bookmarkFilterCategory.value : 'all';
+        const sortBy = bookmarkSortSelect ? bookmarkSortSelect.value : 'date-desc';
+
+        // Filter
         let filtered = bookmarks.filter(item => {
             const matchesSearch = item.title.toLowerCase().includes(query) || 
                                   item.url.toLowerCase().includes(query) || 
@@ -469,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return matchesSearch && matchesCategory;
         });
 
-        // 2. Sort
+        // Sort
         filtered.sort((a, b) => {
             if (sortBy === 'date-desc') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             if (sortBy === 'title-asc') return a.title.localeCompare(b.title);
@@ -477,19 +502,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0;
         });
 
-        // 3. Render Grid Cards
+        // Render Cards with High Contrast Colors
         bookmarkGrid.innerHTML = '';
 
         if (filtered.length === 0) {
-            bookmarkEmptyState.classList.remove('hidden');
+            if (bookmarkEmptyState) bookmarkEmptyState.classList.remove('hidden');
         } else {
-            bookmarkEmptyState.classList.add('hidden');
+            if (bookmarkEmptyState) bookmarkEmptyState.classList.add('hidden');
 
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group';
 
-                // Extract domain name for subtitle preview
                 let domain = '';
                 try {
                     const parsedUrl = new URL(item.url);
@@ -502,38 +526,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="space-y-3">
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg shrink-0 border border-sky-100 group-hover:bg-sky-600 group-hover:text-white transition-all">
+                                <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center text-lg shrink-0 border border-sky-200 group-hover:bg-sky-800 group-hover:text-white transition-all">
                                     <i class="fa-solid fa-globe"></i>
                                 </div>
                                 <div class="overflow-hidden">
-                                    <h4 class="font-bold text-slate-800 text-base leading-snug line-clamp-1">${escapeHTML(item.title)}</h4>
-                                    <p class="text-xs text-slate-400 font-medium truncate">${escapeHTML(domain)}</p>
+                                    <h4 class="font-bold text-slate-900 text-base leading-snug line-clamp-1">${escapeHTML(item.title)}</h4>
+                                    <p class="text-xs text-slate-600 font-bold truncate">${escapeHTML(domain)}</p>
                                 </div>
                             </div>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-800 border border-slate-300 shrink-0">
                                 ${escapeHTML(item.category)}
                             </span>
                         </div>
 
                         ${item.note ? `
-                            <p class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 line-clamp-2 leading-relaxed">
+                            <p class="text-xs text-slate-800 bg-slate-100 p-2.5 rounded-xl border border-slate-200 line-clamp-2 leading-relaxed font-medium">
                                 ${escapeHTML(item.note)}
                             </p>
                         ` : ''}
                     </div>
 
                     <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <!-- Direct Link with target="_blank" and rel="noopener noreferrer" -->
-                        <a href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 font-bold text-sky-600 hover:text-sky-700 hover:underline">
+                        <a href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 font-extrabold text-sky-800 hover:text-sky-950 hover:underline">
                             <span>Buka Tautan</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
                         </a>
 
                         <div class="flex items-center space-x-1">
-                            <button type="button" data-action="edit-bookmark" data-id="${item.id}" class="w-7 h-7 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 flex items-center justify-center transition-all" title="Ubah">
+                            <button type="button" data-action="edit-bookmark" data-id="${item.id}" aria-label="Ubah Bookmark ${escapeHTML(item.title)}" class="w-7 h-7 rounded-lg text-slate-600 hover:text-sky-800 hover:bg-sky-100 flex items-center justify-center transition-all" title="Ubah">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button type="button" data-action="delete-bookmark" data-id="${item.id}" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all" title="Hapus">
+                            <button type="button" data-action="delete-bookmark" data-id="${item.id}" aria-label="Hapus Bookmark ${escapeHTML(item.title)}" class="w-7 h-7 rounded-lg text-slate-600 hover:text-rose-800 hover:bg-rose-100 flex items-center justify-center transition-all" title="Hapus">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -545,8 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Modal Control Functions for Bookmark
     function openBookmarkModal(bookmarkToEdit = null) {
+        if (!modalBookmark || !modalBookmarkCard) return;
+
         formBookmark.reset();
 
         if (bookmarkToEdit) {
@@ -569,6 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeBookmarkModal() {
+        if (!modalBookmark || !modalBookmarkCard) return;
+
         modalBookmarkCard.classList.remove('scale-100', 'opacity-100');
         modalBookmarkCard.classList.add('scale-95', 'opacity-0');
         setTimeout(() => {
@@ -576,98 +602,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
 
-    // URL Validation Helper (must start with http:// or https://)
     function isValidURL(string) {
         const pattern = new RegExp('^(https?:\\/\\/)', 'i');
         return !!pattern.test(string);
     }
 
-    // Bookmark Event Listeners
-    btnOpenAddBookmark.addEventListener('click', () => openBookmarkModal());
-    btnCloseBookmarkModal.addEventListener('click', closeBookmarkModal);
-    btnCancelBookmark.addEventListener('click', closeBookmarkModal);
+    if (btnOpenAddBookmark) btnOpenAddBookmark.addEventListener('click', () => openBookmarkModal());
+    if (btnCloseBookmarkModal) btnCloseBookmarkModal.addEventListener('click', closeBookmarkModal);
+    if (btnCancelBookmark) btnCancelBookmark.addEventListener('click', closeBookmarkModal);
 
     [bookmarkSearchInput, bookmarkFilterCategory, bookmarkSortSelect].forEach(element => {
-        element.addEventListener('input', renderBookmarks);
-        element.addEventListener('change', renderBookmarks);
+        if (element) {
+            element.addEventListener('input', renderBookmarks);
+            element.addEventListener('change', renderBookmarks);
+        }
     });
 
-    // Form Submit (Add/Edit Bookmark)
-    formBookmark.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (formBookmark) {
+        formBookmark.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        const title = inputBookmarkTitle.value.trim();
-        const url = inputBookmarkUrl.value.trim();
-        const category = inputBookmarkCategory.value;
-        const note = inputBookmarkNote.value.trim();
-        const id = inputBookmarkId.value;
+            const title = inputBookmarkTitle.value.trim();
+            const url = inputBookmarkUrl.value.trim();
+            const category = inputBookmarkCategory.value;
+            const note = inputBookmarkNote.value.trim();
+            const id = inputBookmarkId.value;
 
-        if (!title) {
-            showToast('Nama tautan wajib diisi!', 'error');
-            return;
-        }
-
-        if (!isValidURL(url)) {
-            showToast('URL harus valid dan diawali http:// atau https://', 'error');
-            return;
-        }
-
-        if (id) {
-            // Edit existing
-            const index = bookmarks.findIndex(x => x.id === id);
-            if (index !== -1) {
-                bookmarks[index] = { ...bookmarks[index], title, url, category, note };
-                showToast('Bookmark berhasil diperbarui!', 'success');
+            if (!title) {
+                showToast('Nama tautan wajib diisi!', 'error');
+                return;
             }
-        } else {
-            // Add new
-            const newItem = {
-                id: 'bm-' + Date.now(),
-                title,
-                url,
-                category,
-                note,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
-            bookmarks.unshift(newItem);
-            showToast('Bookmark berhasil disimpan!', 'success');
-        }
 
-        saveBookmarks();
-        renderBookmarks();
-        closeBookmarkModal();
-    });
-
-    // Delegate Bookmark Actions
-    bookmarkGrid.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action]');
-        if (!btn) return;
-
-        const action = btn.getAttribute('data-action');
-        const id = btn.getAttribute('data-id');
-
-        if (action === 'edit-bookmark') {
-            const item = bookmarks.find(x => x.id === id);
-            if (item) openBookmarkModal(item);
-        } else if (action === 'delete-bookmark') {
-            const item = bookmarks.find(x => x.id === id);
-            if (item) {
-                openDeleteConfirmModal(`Apakah Anda yakin ingin menghapus bookmark "${item.title}"?`, () => {
-                    bookmarks = bookmarks.filter(x => x.id !== id);
-                    saveBookmarks();
-                    renderBookmarks();
-                    showToast('Bookmark telah dihapus.', 'info');
-                });
+            if (!isValidURL(url)) {
+                showToast('URL harus valid dan diawali http:// atau https://', 'error');
+                return;
             }
-        }
-    });
+
+            if (id) {
+                const index = bookmarks.findIndex(x => x.id === id);
+                if (index !== -1) {
+                    bookmarks[index] = { ...bookmarks[index], title, url, category, note };
+                    showToast('Bookmark berhasil diperbarui!', 'success');
+                }
+            } else {
+                const newItem = {
+                    id: 'bm-' + Date.now(),
+                    title,
+                    url,
+                    category,
+                    note,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+                bookmarks.unshift(newItem);
+                showToast('Bookmark berhasil disimpan!', 'success');
+            }
+
+            saveBookmarks();
+            renderBookmarks();
+            closeBookmarkModal();
+        });
+    }
+
+    if (bookmarkGrid) {
+        bookmarkGrid.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const id = btn.getAttribute('data-id');
+
+            if (action === 'edit-bookmark') {
+                const item = bookmarks.find(x => x.id === id);
+                if (item) openBookmarkModal(item);
+            } else if (action === 'delete-bookmark') {
+                const item = bookmarks.find(x => x.id === id);
+                if (item) {
+                    openDeleteConfirmModal(`Apakah Anda yakin ingin menghapus bookmark "${item.title}"?`, () => {
+                        bookmarks = bookmarks.filter(x => x.id !== id);
+                        saveBookmarks();
+                        renderBookmarks();
+                        showToast('Bookmark telah dihapus.', 'info');
+                    });
+                }
+            }
+        });
+    }
 
 
     /* ==========================================================================
        5. QUIZ APP LOGIC (FITUR 3)
        ========================================================================== */
 
-    // Array of Quiz Questions Object (JS Data Structure)
     const quizQuestions = [
         {
             id: 1,
@@ -731,7 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // Quiz Application State
     let quizState = {
         currentIndex: 0,
         score: 0,
@@ -740,7 +764,6 @@ document.addEventListener('DOMContentLoaded', () => {
         highScore: parseInt(localStorage.getItem(STORAGE_KEYS.QUIZ_HIGHSCORE) || '0', 10)
     };
 
-    // DOM Elements for Quiz
     const quizHighScoreDisplay = document.getElementById('quiz-highscore-display');
     const quizScreenStart = document.getElementById('quiz-screen-start');
     const quizScreenQuestion = document.getElementById('quiz-screen-question');
@@ -767,82 +790,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizNewHighScoreTag = document.getElementById('quiz-new-highscore-tag');
     const quizResultBadgeIcon = document.getElementById('quiz-result-badge-icon');
 
-    /**
-     * Update High Score UI
-     */
     function updateHighScoreUI() {
-        quizHighScoreDisplay.textContent = `${quizState.highScore} / ${quizQuestions.length}`;
+        if (quizHighScoreDisplay) {
+            quizHighScoreDisplay.textContent = `${quizState.highScore} / ${quizQuestions.length}`;
+        }
     }
 
-    /**
-     * Start / Reset Quiz
-     */
     function startQuiz() {
         quizState.currentIndex = 0;
         quizState.score = 0;
         quizState.selectedOption = null;
         quizState.isAnswered = false;
 
-        quizScreenStart.classList.add('hidden');
-        quizScreenResult.classList.add('hidden');
-        quizScreenQuestion.classList.remove('hidden');
+        if (quizScreenStart) quizScreenStart.classList.add('hidden');
+        if (quizScreenResult) quizScreenResult.classList.add('hidden');
+        if (quizScreenQuestion) quizScreenQuestion.classList.remove('hidden');
 
         renderQuizQuestion();
     }
 
-    /**
-     * Render Current Question
-     */
     function renderQuizQuestion() {
         const currentQ = quizQuestions[quizState.currentIndex];
         quizState.selectedOption = null;
         quizState.isAnswered = false;
 
-        // Reset Next button
-        btnQuizNext.disabled = true;
-        btnQuizNext.className = 'px-6 py-3 bg-slate-300 text-slate-500 font-bold text-sm rounded-xl cursor-not-allowed transition-all flex items-center space-x-2';
-        btnQuizNext.querySelector('span').textContent = (quizState.currentIndex === quizQuestions.length - 1) ? 'Lihat Hasil Kuis' : 'Soal Berikutnya';
+        if (btnQuizNext) {
+            btnQuizNext.disabled = true;
+            btnQuizNext.className = 'px-6 py-3 bg-slate-300 text-slate-600 font-bold text-sm rounded-xl cursor-not-allowed transition-all flex items-center space-x-2';
+            const btnSpan = btnQuizNext.querySelector('span');
+            if (btnSpan) btnSpan.textContent = (quizState.currentIndex === quizQuestions.length - 1) ? 'Lihat Hasil Kuis' : 'Soal Berikutnya';
+        }
 
-        // Hide Feedback box
-        quizFeedbackBox.classList.add('hidden');
+        if (quizFeedbackBox) quizFeedbackBox.classList.add('hidden');
 
-        // Update progress & live score
-        quizProgressText.textContent = `Soal ${quizState.currentIndex + 1} dari ${quizQuestions.length}`;
-        quizScoreLive.textContent = `Skor: ${quizState.score}`;
+        if (quizProgressText) quizProgressText.textContent = `Soal ${quizState.currentIndex + 1} dari ${quizQuestions.length}`;
+        if (quizScoreLive) quizScoreLive.textContent = `Skor: ${quizState.score}`;
         const progressPercentage = ((quizState.currentIndex + 1) / quizQuestions.length) * 100;
-        quizProgressBar.style.width = `${progressPercentage}%`;
+        if (quizProgressBar) quizProgressBar.style.width = `${progressPercentage}%`;
 
-        // Render question text
-        quizQuestionText.textContent = currentQ.question;
+        if (quizQuestionText) quizQuestionText.textContent = currentQ.question;
 
-        // Render Options Buttons
-        quizOptionsContainer.innerHTML = '';
-        const optionLabels = ['A', 'B', 'C', 'D'];
+        if (quizOptionsContainer) {
+            quizOptionsContainer.innerHTML = '';
+            const optionLabels = ['A', 'B', 'C', 'D'];
 
-        currentQ.options.forEach((optText, idx) => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'quiz-opt-btn w-full p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50/50 hover:border-purple-300 text-left transition-all flex items-center space-x-3 group';
-            btn.setAttribute('data-index', idx);
+            currentQ.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'quiz-opt-btn w-full p-4 rounded-xl border border-slate-300 bg-slate-50 hover:bg-purple-100 hover:border-purple-400 text-left transition-all flex items-center space-x-3 group';
+                btn.setAttribute('data-index', idx);
 
-            btn.innerHTML = `
-                <span class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                    ${optionLabels[idx]}
-                </span>
-                <span class="text-sm font-semibold text-slate-700 leading-snug">${escapeHTML(optText)}</span>
-            `;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-900 font-bold text-xs flex items-center justify-center shrink-0 group-hover:bg-purple-800 group-hover:text-white transition-all">
+                        ${optionLabels[idx]}
+                    </span>
+                    <span class="text-sm font-bold text-slate-900 leading-snug">${escapeHTML(optText)}</span>
+                `;
 
-            btn.addEventListener('click', () => selectQuizOption(idx));
-            quizOptionsContainer.appendChild(btn);
-        });
+                btn.addEventListener('click', () => selectQuizOption(idx));
+                quizOptionsContainer.appendChild(btn);
+            });
+        }
     }
 
-    /**
-     * Handle option selection
-     * @param {number} selectedIdx 
-     */
     function selectQuizOption(selectedIdx) {
-        if (quizState.isAnswered) return; // Allow selection only once
+        if (quizState.isAnswered) return;
 
         quizState.isAnswered = true;
         quizState.selectedOption = selectedIdx;
@@ -852,49 +864,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isCorrect) {
             quizState.score += 1;
-            quizScoreLive.textContent = `Skor: ${quizState.score}`;
+            if (quizScoreLive) quizScoreLive.textContent = `Skor: ${quizState.score}`;
         }
 
-        // Highlight options in DOM
-        const optButtons = quizOptionsContainer.querySelectorAll('.quiz-opt-btn');
-        optButtons.forEach((btn, idx) => {
-            btn.disabled = true;
+        if (quizOptionsContainer) {
+            const optButtons = quizOptionsContainer.querySelectorAll('.quiz-opt-btn');
+            optButtons.forEach((btn, idx) => {
+                btn.disabled = true;
 
-            if (idx === currentQ.correct) {
-                // Correct answer style
-                btn.className = 'w-full p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-left flex items-center space-x-3';
-                btn.querySelector('span:first-child').className = 'w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0';
-            } else if (idx === selectedIdx && !isCorrect) {
-                // Wrong selected option style
-                btn.className = 'w-full p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-left flex items-center space-x-3';
-                btn.querySelector('span:first-child').className = 'w-8 h-8 rounded-lg bg-rose-600 text-white font-bold text-xs flex items-center justify-center shrink-0';
+                if (idx === currentQ.correct) {
+                    btn.className = 'w-full p-4 rounded-xl border-2 border-emerald-700 bg-emerald-100 text-left flex items-center space-x-3';
+                    const badge = btn.querySelector('span:first-child');
+                    if (badge) badge.className = 'w-8 h-8 rounded-lg bg-emerald-800 text-white font-bold text-xs flex items-center justify-center shrink-0';
+                    const txt = btn.querySelector('span:last-child');
+                    if (txt) txt.className = 'text-sm font-extrabold text-emerald-950 leading-snug';
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.className = 'w-full p-4 rounded-xl border-2 border-rose-700 bg-rose-100 text-left flex items-center space-x-3';
+                    const badge = btn.querySelector('span:first-child');
+                    if (badge) badge.className = 'w-8 h-8 rounded-lg bg-rose-800 text-white font-bold text-xs flex items-center justify-center shrink-0';
+                    const txt = btn.querySelector('span:last-child');
+                    if (txt) txt.className = 'text-sm font-extrabold text-rose-950 leading-snug';
+                } else {
+                    btn.className = 'w-full p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-50 text-left flex items-center space-x-3 cursor-not-allowed';
+                }
+            });
+        }
+
+        if (quizFeedbackBox) {
+            quizFeedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                quizFeedbackBox.className = 'p-4 rounded-xl border border-emerald-400 bg-emerald-100 text-emerald-950 text-sm font-medium';
+                if (quizFeedbackIcon) quizFeedbackIcon.className = 'fa-solid fa-circle-check text-emerald-800 text-lg mt-0.5';
+                if (quizFeedbackTitle) quizFeedbackTitle.textContent = 'Jawaban Benar!';
+                if (quizFeedbackDesc) quizFeedbackDesc.textContent = currentQ.explanation;
             } else {
-                btn.className = 'w-full p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-60 text-left flex items-center space-x-3 cursor-not-allowed';
+                quizFeedbackBox.className = 'p-4 rounded-xl border border-rose-400 bg-rose-100 text-rose-950 text-sm font-medium';
+                if (quizFeedbackIcon) quizFeedbackIcon.className = 'fa-solid fa-circle-xmark text-rose-800 text-lg mt-0.5';
+                if (quizFeedbackTitle) quizFeedbackTitle.textContent = 'Jawaban Kurang Tepat';
+                if (quizFeedbackDesc) quizFeedbackDesc.textContent = currentQ.explanation;
             }
-        });
-
-        // Show Feedback Box
-        quizFeedbackBox.classList.remove('hidden');
-        if (isCorrect) {
-            quizFeedbackBox.className = 'p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-sm';
-            quizFeedbackIcon.className = 'fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5';
-            quizFeedbackTitle.textContent = 'Jawaban Benar!';
-            quizFeedbackDesc.textContent = currentQ.explanation;
-        } else {
-            quizFeedbackBox.className = 'p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-900 text-sm';
-            quizFeedbackIcon.className = 'fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5';
-            quizFeedbackTitle.textContent = 'Jawaban Kurang Tepat';
-            quizFeedbackDesc.textContent = currentQ.explanation;
         }
 
-        // Enable Next Button
-        btnQuizNext.disabled = false;
-        btnQuizNext.className = 'px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center space-x-2';
+        if (btnQuizNext) {
+            btnQuizNext.disabled = false;
+            btnQuizNext.className = 'px-6 py-3 bg-purple-800 hover:bg-purple-900 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center space-x-2 border border-purple-700';
+        }
     }
 
-    /**
-     * Next question or Show Results
-     */
     function nextQuizStep() {
         if (!quizState.isAnswered) return;
 
@@ -906,22 +922,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Finish Quiz & Show Score Result Screen
-     */
     function showQuizResults() {
-        quizScreenQuestion.classList.add('hidden');
-        quizScreenResult.classList.remove('hidden');
+        if (quizScreenQuestion) quizScreenQuestion.classList.add('hidden');
+        if (quizScreenResult) quizScreenResult.classList.remove('hidden');
 
         const totalQ = quizQuestions.length;
         const score = quizState.score;
         const percentage = Math.round((score / totalQ) * 100);
 
-        quizFinalScore.textContent = score;
-        quizTotalQuestions.textContent = totalQ;
-        quizPercentageText.textContent = `Tingkat Akurasi: ${percentage}%`;
+        if (quizFinalScore) quizFinalScore.textContent = score;
+        if (quizTotalQuestions) quizTotalQuestions.textContent = totalQ;
+        if (quizPercentageText) quizPercentageText.textContent = `Tingkat Akurasi: ${percentage}%`;
 
-        // Check & Update High Score
         let isNewRecord = false;
         if (score > quizState.highScore) {
             quizState.highScore = score;
@@ -930,25 +942,25 @@ document.addEventListener('DOMContentLoaded', () => {
             isNewRecord = true;
         }
 
-        // UI Adjustments based on performance
         if (isNewRecord) {
-            quizNewHighScoreTag.classList.remove('hidden');
-            quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-amber-100 text-amber-600 border border-amber-200';
+            if (quizNewHighScoreTag) quizNewHighScoreTag.classList.remove('hidden');
+            if (quizResultBadgeIcon) quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-amber-200 text-amber-900 border border-amber-400';
             showToast('Selamat! Anda meraih Rekor Baru di Kuis!', 'success');
         } else {
-            quizNewHighScoreTag.classList.add('hidden');
-            if (percentage >= 80) {
-                quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-emerald-100 text-emerald-600 border border-emerald-200';
-            } else {
-                quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-indigo-100 text-indigo-600 border border-indigo-200';
+            if (quizNewHighScoreTag) quizNewHighScoreTag.classList.add('hidden');
+            if (quizResultBadgeIcon) {
+                if (percentage >= 80) {
+                    quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-emerald-200 text-emerald-950 border border-emerald-400';
+                } else {
+                    quizResultBadgeIcon.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg bg-purple-200 text-purple-950 border border-purple-400';
+                }
             }
         }
     }
 
-    // Quiz Event Listeners
-    btnQuizStart.addEventListener('click', startQuiz);
-    btnQuizNext.addEventListener('click', nextQuizStep);
-    btnQuizRetry.addEventListener('click', startQuiz);
+    if (btnQuizStart) btnQuizStart.addEventListener('click', startQuiz);
+    if (btnQuizNext) btnQuizNext.addEventListener('click', nextQuizStep);
+    if (btnQuizRetry) btnQuizRetry.addEventListener('click', startQuiz);
 
 
     /* ==========================================================================
@@ -964,7 +976,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let onConfirmDeleteCallback = null;
 
     function openDeleteConfirmModal(message, callback) {
-        deleteModalMessage.textContent = message;
+        if (!modalDeleteConfirm || !modalDeleteCard) return;
+
+        if (deleteModalMessage) deleteModalMessage.textContent = message;
         onConfirmDeleteCallback = callback;
 
         modalDeleteConfirm.classList.remove('hidden');
@@ -975,6 +989,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeDeleteConfirmModal() {
+        if (!modalDeleteConfirm || !modalDeleteCard) return;
+
         modalDeleteCard.classList.remove('scale-100', 'opacity-100');
         modalDeleteCard.classList.add('scale-95', 'opacity-0');
         setTimeout(() => {
@@ -983,21 +999,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
 
-    btnCancelDelete.addEventListener('click', closeDeleteConfirmModal);
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteConfirmModal);
 
-    btnConfirmDelete.addEventListener('click', () => {
-        if (typeof onConfirmDeleteCallback === 'function') {
-            onConfirmDeleteCallback();
-        }
-        closeDeleteConfirmModal();
-    });
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', () => {
+            if (typeof onConfirmDeleteCallback === 'function') {
+                onConfirmDeleteCallback();
+            }
+            closeDeleteConfirmModal();
+        });
+    }
 
 
     /* ==========================================================================
        7. HELPER & INITIALIZATION
        ========================================================================== */
 
-    // HTML Sanitizer to prevent XSS in dynamic rendering
     function escapeHTML(str) {
         if (!str) return '';
         return String(str)
